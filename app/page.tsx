@@ -1,51 +1,77 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/server";
+import { getGoals, getUserProfile, getGoalByCurrentUser } from "@/lib/data";
+import { GoalCard } from "@/components/goals/GoalCard";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Sidebar } from "@/components/sidebar";
+import CreateGoalPage from "./(dashboard)/goals/create/page";
+import { MyGoalView } from "@/components/my-goal-view";
+import { AccountView } from "@/components/account-view";
+import { Header } from "@/components/header";
+import { SponsorPanel } from "@/components/sponsor-panel";
+import { UserProfile } from "@/lib/types";
 
-export default function Home() {
+const GoalsList = async ({ userRole }: { userRole?: UserProfile['role'] }) => {
+  const goals = await getGoals();
+  const userProfile = await getUserProfile();
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
-            </div>
-            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
-          </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div>
-
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
-          <ThemeSwitcher />
-        </footer>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">All Goals</h1>
+        <p className="text-muted-foreground">Browse and fund creative projects.</p>
       </div>
-    </main>
+
+      {goals.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {goals.map((goal) => (
+            <GoalCard key={goal.id} goal={goal} userRole={userRole} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-10 border-dashed border-2 rounded-lg">
+          <h2 className="text-xl font-medium">No goals found.</h2>
+          <p className="text-muted-foreground mb-4">Be the first to create one!</p>
+          <Link href="/?view=create">
+              <Button>Create a Goal</Button>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+export default async function Home({ searchParams }: { searchParams?: { view?: string }}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const userProfile = await getUserProfile();
+  
+  const renderContent = () => {
+    switch (searchParams?.view) {
+      case 'create':
+        return <CreateGoalPage />;
+      case 'my-goal':
+        const currentUserGoal = getGoalByCurrentUser();
+        return <MyGoalView goalPromise={currentUserGoal} userRole={userProfile?.role} />;
+      case 'account':
+        return <AccountView userProfile={userProfile} userEmail={user?.email} />;
+      case 'panel':
+        return <SponsorPanel userRole={userProfile?.role} />;
+      default:
+        return <GoalsList userRole={userProfile?.role} />;
+    }
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <div className="flex flex-1">
+        <Sidebar searchParams={searchParams} />
+        <main className="flex-1 p-6">
+          {renderContent()}
+        </main>
+      </div>
+    </div>
   );
 }
