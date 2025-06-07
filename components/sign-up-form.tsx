@@ -23,6 +23,9 @@ export function SignUpForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [xrpWalletAddress, setXrpWalletAddress] = useState("");
+  const [role, setRole] = useState<"developer" | "sponsor">("developer");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -40,17 +43,42 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${window.location.origin}`,
         },
       });
-      if (error) throw error;
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      if (!data.user) {
+        throw new Error("Sign up successful, but no user data returned.");
+      }
+      
+      const { error: profileError } = await supabase.from("users").insert({
+        id: data.user.id,
+        username,
+        xrp_wallet_address: xrpWalletAddress,
+        role,
+      });
+
+      if (profileError) {
+        console.error("Error creating user profile:", profileError);
+        // Even if profile creation fails, we proceed to redirection.
+        // The user might need to complete their profile later.
+        // A more robust solution might involve cleaning up the auth user.
+        setError(`Account created, but failed to create user profile: ${profileError.message}. Please contact support.`);
+      }
+
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      const message = error instanceof Error ? error.message : "An unexpected error occurred.";
+      console.error("Sign up error:", message);
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +106,17 @@ export function SignUpForm({
                 />
               </div>
               <div className="grid gap-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="your_username"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                 </div>
@@ -100,6 +139,38 @@ export function SignUpForm({
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
                 />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="xrp_address">
+                  XRP Address
+                </Label>
+                <Input
+                  id="xrp_address"
+                  type="text"
+                  placeholder="r..."
+                  required
+                  value={xrpWalletAddress}
+                  onChange={(e) => setXrpWalletAddress(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Role</Label>
+                <div className="grid grid-cols-2 gap-2">
+                    <Button
+                        type="button"
+                        variant={role === 'developer' ? 'default' : 'outline'}
+                        onClick={() => setRole('developer')}
+                    >
+                        Developer
+                    </Button>
+                    <Button
+                        type="button"
+                        variant={role === 'sponsor' ? 'default' : 'outline'}
+                        onClick={() => setRole('sponsor')}
+                    >
+                        Sponsor
+                    </Button>
+                </div>
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
