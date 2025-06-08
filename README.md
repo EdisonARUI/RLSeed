@@ -1,105 +1,109 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# RLSeed: Decentralized Project Funding Platform
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+RLSeed is a decentralized platform that connects sponsors with development teams, enabling transparent and milestone-based project funding on the XRPL network.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+Each component is optimized for user experience, security, and scalability, while maintaining a clear separation of concerns.
 
-## Features
+## 🛠 Core Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+### Purpose:
+Manages project funding, milestone tracking, and secure fund distribution.
 
-## Demo
+### Key Functions:
+- **Project Creation**:  
+  Development teams can create new goal with detailed descriptions and milestone breakdowns.
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+- **Project Funding**:  
+  Sponsors can fund projects with XRPL payments, with funds held in escrow until milestones are completed.
 
-## Deploy to Vercel
+- **Milestone Management**:  
+  Development teams can track and submit completed milestones for sponsor approval.
 
-Vercel deployment will guide you through creating a Supabase account and project.
+- **Fund Release**:  
+  Sponsors can release funds for approved milestones, with automatic distribution to development teams.
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+### Security:
+- Funds are held in a secure escrow account
+- Milestone-based fund release ensures accountability
+- Transparent project tracking and status updates
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+---
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+## Dashboard
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+### Purpose:
+Provides a comprehensive overview of all projects and quick access to key functions.
 
-## Clone and run locally
+### Key Features:
+- Project listing with core information (title, status, progress)
+- Quick access to project creation
+- Status overview of all milestones
+- Sponsor management panel
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+---
 
-2. Create a Next.js app using the Supabase Starter template npx command
+## Panel
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+### Purpose:
+Handles the complete lifecycle of projects from creation to completion.
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+### Key Functions:
+- **Project Creation**:  
+  Teams can create projects with detailed descriptions and milestone breakdowns.
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+- **Milestone Tracking**:  
+  Development teams can track progress and submit completed milestones.
 
-3. Use `cd` to change into the app's directory
+- **Fund Management**:  
+  Sponsors can monitor and release funds based on milestone completion.
 
-   ```bash
-   cd with-supabase-app
-   ```
+---
+## My Goal
+### Purpose:
+Provides development teams with a dedicated view of their active goals and milestones.
 
-4. Rename `.env.example` to `.env.local` and update the following:
+### Key Functions:
+- **Goal Overview**:  
+  View all active goals with their current status and progress.
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+- **Milestone Management**:  
+  Track and submit completed milestones for sponsor review.
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+- **Progress Tracking**:  
+  Monitor the status of each milestone and its associated rewards.
 
-5. You can now run the Next.js local development server:
+- **Quick Actions**:  
+  Submit milestone completions and communicate with sponsors.
 
-   ```bash
-   npm run dev
-   ```
+## Account
+### Purpose:
+Manages user profiles and platform interactions for both sponsors and development teams.
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+### Key Functions:
+- **Profile Management**:  
+  Update personal information and wallet addresses.
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+- **Role-based Access**:  
+  Different views and permissions for sponsors and development teams.
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+## 🔗 System Interaction Flow
 
-## Feedback and issues
+1. Development team creates a project with milestones
+2. Sponsor reviews and funds the project
+3. Development team works on milestones
+4. Team submits completed milestones for review
+5. Sponsor approves milestones and releases funds
+6. Funds are automatically distributed to the development team
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+---
 
-## More Supabase examples
+## ✅ Final Summary
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+This platform architecture ensures that:
+- Projects are transparently managed
+- Funds are securely held and distributed
+- Milestones are clearly tracked and verified
+- All parties have clear visibility of project status
+
+---
+
