@@ -8,14 +8,13 @@ import { AuthButton } from "@/components/auth-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Link from "next/link";
 
-type GoalDetailPageProps = {
-    params: {
-        id: string;
-    }
-}
-
-export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
-    const goal = await getGoalById(params.id);
+type Props = {
+    params: Promise<{ id: string }>;
+};
+  
+export default async function Page({ params }: Props) {
+    const { id } = await params;
+    const goal = await getGoalById(id);
 
     if (!goal) {
         notFound();
