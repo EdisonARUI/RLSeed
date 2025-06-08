@@ -21,7 +21,7 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
             <div className="space-y-4">
                 {milestones.map((milestone) => (
                      <Card key={milestone.id}>
-                        <CardHeader>
+            <CardHeader>
                              <div className="flex justify-between items-start">
                                 <CardTitle className="text-xl">{milestone.title}</CardTitle>
                                 <Badge variant={milestone.status === 'completed' || milestone.status === 'approved' ? 'default' : 'secondary'}>
@@ -35,14 +35,14 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
                                     <span>Due by {format(new Date(milestone.deadline), "MMM dd, yyyy")}</span>
                                 </CardDescription>
                              )}
-                        </CardHeader>
-                        <CardContent>
+            </CardHeader>
+            <CardContent>
                              <p className="text-muted-foreground mb-2">
                                 {milestone.description || 'No description provided.'}
                              </p>
                              <p className="font-semibold">{milestone.reward_amount} XRP</p>
-                        </CardContent>
-                     </Card>
+            </CardContent>
+        </Card>
                 ))}
             </div>
         </div>

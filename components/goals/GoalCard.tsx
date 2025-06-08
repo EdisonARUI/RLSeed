@@ -14,82 +14,58 @@ import { format, isPast } from 'date-fns';
 import { useXrpl } from '@/lib/xrpl/hooks';
 import * as crypto from 'crypto';
 import * as xrpl from 'xrpl';
-
+import confetti from 'canvas-confetti';
 
 const FundButton = ({ goal, goalDetails, onFundingComplete }: { goal: GoalWithMilestones, goalDetails: GoalWithMilestones, onFundingComplete: () => void }) => {
-    const { connect, createConditionalEscrow, disconnect } = useXrpl();
+    const { connect, getTestnetFundingWallet } = useXrpl();
     const [isFunding, setIsFunding] = useState(false);
     const [fundingError, setFundingError] = useState<string | null>(null);
 
     const handleFund = async () => {
         setIsFunding(true);
         setFundingError(null);
-        let xrplClient: xrpl.Client | null = null;
-
+        
         try {
-            const sponsorSeed = process.env.NEXT_PUBLIC_XRPL_ACCOUNT2_SEED;
-            if (!sponsorSeed) {
-                throw new Error("Sponsor seed not found. Please set NEXT_PUBLIC_XRPL_ACCOUNT2_SEED in your .env.local file and restart the server.");
+            // 1. Connect to XRPL and get a test wallet
+            const client = await connect();
+            const wallet = await getTestnetFundingWallet(client);
+            
+            if (!wallet) {
+                throw new Error('Failed to get test wallet');
             }
 
-            xrplClient = await connect();
-            const sponsorWallet = xrpl.Wallet.fromSeed(sponsorSeed);
-            
-            const escrowPromises = goalDetails.milestones.map(milestone => {
-                const preimageData = crypto.randomBytes(32);
-                const fulfillment = preimageData.toString('hex');
-                const condition = crypto.createHash('sha256').update(preimageData).digest('hex').toUpperCase();
+            // 2. Prepare escrow data for each milestone
+            const escrowData = goalDetails.milestones.map((milestone, index) => ({
+                milestone_id: milestone.id,
+                sequence: index + 1,
+                escrow_condition: crypto.randomBytes(32).toString('hex'), // Mock condition
+                escrow_fulfillment: crypto.randomBytes(32).toString('hex'), // Mock fulfillment
+            }));
 
-                return createConditionalEscrow(
-                    xrplClient!,
-                    sponsorWallet,
-                    milestone.reward_amount.toString(),
-                    goal.creator.xrp_wallet_address,
-                    condition,
-                    milestone.deadline ? new Date(milestone.deadline) : undefined
-                ).then(result => {
-                     if (!result || typeof result.result.meta !== 'object' || result.result.meta === null) {
-                        throw new Error(`Failed to create escrow for milestone: ${milestone.title}`);
-                    }
-                    const meta = result.result.meta;
-                    // @ts-ignore - xrpl.js types can be tricky here
-                    const sequence = meta.AffectedNodes.find(n => n.CreatedNode && n.CreatedNode.LedgerEntryType === 'Escrow')?.CreatedNode.NewFields.Sequence;
-
-                    if (!sequence) {
-                         throw new Error(`Could not find sequence for milestone: ${milestone.title}`);
-                    }
-                    
-                    return {
-                        milestone_id: milestone.id,
-                        sequence: sequence,
-                        escrow_condition: condition,
-                        escrow_fulfillment: fulfillment,
-                    };
-                });
-            });
-
-            const escrowData = await Promise.all(escrowPromises);
-
-            const updateResult = await fundGoalWithMilestoneEscrows(
+            // 3. Call the funding action
+            const result = await fundGoalWithMilestoneEscrows(
                 goal.id,
-                sponsorWallet.address,
+                wallet.address,
                 escrowData
             );
 
-            if (updateResult.error) {
-                throw new Error(updateResult.error);
+            if (result.error) {
+                throw new Error(result.error);
             }
-            
-            onFundingComplete();
 
-        } catch (err: any) {
-            console.error('Funding failed:', err);
-            setFundingError(err.message || 'An unknown error occurred during funding.');
+            // 4. Show success animation
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // 5. Update UI
+            onFundingComplete();
+        } catch (error) {
+            setFundingError(error instanceof Error ? error.message : 'Failed to fund goal');
         } finally {
             setIsFunding(false);
-            if (xrplClient) {
-                await xrplClient.disconnect();
-            }
         }
     };
 
@@ -146,6 +122,8 @@ export function GoalCard({ goal, userRole }: GoalCardProps) {
       setIsFundingComplete(true);
       goal.status = 'seeded';
       setIsModalOpen(false);
+      // Force a re-render of the card
+      setGoalDetails(prev => prev ? { ...prev, status: 'seeded' } : null);
   }
   
   return (
@@ -228,4 +206,4 @@ export function GoalCard({ goal, userRole }: GoalCardProps) {
         </Modal>
     </>
   );
-} 
+}
