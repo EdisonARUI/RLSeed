@@ -40,13 +40,14 @@ const GoalsList = async ({ userRole }: { userRole?: UserProfile['role'] }) => {
   );
 };
 
-export default async function Home({ searchParams }: { searchParams?: { view?: string }}) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
+  const params = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const userProfile = await getUserProfile();
   
   const renderContent = () => {
-    switch (searchParams?.view) {
+    switch (params?.view) {
       case 'create':
         return <CreateGoalPage />;
       case 'my-goal':
@@ -73,7 +74,7 @@ export default async function Home({ searchParams }: { searchParams?: { view?: s
     <div className="flex flex-col min-h-screen">
       <Header />
       <div className="flex flex-1">
-        <Sidebar searchParams={searchParams} />
+        <Sidebar searchParams={params} />
         <main className="flex-1 p-6">
           {renderContent()}
         </main>
